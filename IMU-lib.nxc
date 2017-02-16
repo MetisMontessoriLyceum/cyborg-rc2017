@@ -1,0 +1,308 @@
+/************************************************************************/
+/*                                                                      */
+/* Program Name: IMU-lib.nxc */
+/* ===========================                                          */
+/*                                                                      */
+/* Copyright (c) 2012 by mindsensors.com                                */
+/* Email: info (<at>) mindsensors (<dot>) com                           */
+/*                                                                      */
+/* This program is free software. You can redistribute it and/or modify */
+/* it under the terms of the GNU General Public License as published by */
+/* the Free Software Foundation; version 3 of the License.              */
+/* Read the license at: http://www.gnu.org/licenses/gpl.txt             */
+/*                                                                      */
+/************************************************************************/
+/*
+ * When        Who             Comments
+ * 04/19/12    Deepak Patil    Adapted from ACCL file.
+ */
+
+struct magnetic_field
+{
+  int   mx;
+  int   my;
+  int   mz;
+};
+
+struct gyro
+{
+	byte gx_h;
+	byte gx_l;
+	byte gy_h;
+	byte gy_l;
+	byte gz_h;
+	byte gz_l;
+
+  int   gx;
+  int   gy;
+  int   gz;
+	int error;
+};
+
+struct accl
+{
+	short  tx;
+	short  ty;
+	short  tz;
+
+	byte ax_h;
+	byte ax_l;
+	byte ay_h;
+	byte ay_l;
+	byte az_h;
+	byte az_l;
+
+  int   ax;
+  int   ay;
+  int   az;
+	int error;
+};
+
+struct cmps
+{
+  int heading;
+	byte heading_h;
+	byte heading_l;
+	int error;
+};
+
+int IMU_MLBToInteger(byte lsb, byte msb) {
+  int i;
+
+  i = lsb + (msb<<8);
+
+  return i;
+}
+
+byte IMU_ReadFilter(byte port, byte i2cAddr) {
+  byte message[];
+  unsigned byte buf[2];
+  int count;
+  byte b;
+  byte nByteReady = 0;
+
+  ArrayBuild(message, i2cAddr, 0x5a);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 1;
+  if(I2CBytes(port, message, count, buf)) {
+    b = buf[0];
+	}
+	return b;
+}
+
+void IMU_WriteFilter(byte port, byte i2cAddr, byte filter) {
+  byte cmdBuf[];
+  ArrayBuild(cmdBuf, i2cAddr, 0x5a, filter);
+  I2CWrite(port, 0, cmdBuf);
+  int status = I2CCheckStatus(port);
+  while (status > NO_ERR)
+    status = I2CCheckStatus(port);
+}
+/*
+ * if you are sending command to change sensor sensitivity,
+ * after sending command, allow 50 milliseconds to
+ * reconfigure the sensor.
+ */
+void IMU_SendCommand(byte port, byte i2cAddr, byte cmd) {
+  byte cmdBuf[];
+  ArrayBuild(cmdBuf, i2cAddr, 0x41, cmd);
+  I2CWrite(port, 0, cmdBuf);
+  int status = I2CCheckStatus(port);
+  while (status > NO_ERR)
+    status = I2CCheckStatus(port);
+}
+
+
+/**
+ * Read an integer from IMU.
+ */
+int IMU_ReadInteger (byte port, byte i2cAddr, int reg_to_read)
+{
+  byte message[];
+  unsigned byte buf[20];
+  int count, l;
+	int result = 0;
+  byte nByteReady = 0;
+
+  ArrayBuild(message, i2cAddr, reg_to_read);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 2;
+  if(I2CBytes(port, message, count, buf)) {
+		result = buf[0] + (buf[1]<<8);
+	}
+	return result;
+}
+
+byte IMU_ReadGLevel(byte port, byte i2cAddr)
+{
+  byte message[];
+  byte buf[12];
+  int count;
+  byte nByteReady = 0;
+	byte b;
+
+  SetSensorLowspeed(port);
+
+  ArrayBuild(message, i2cAddr, 0x19);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 1;
+  if(I2CBytes(port, message, count, buf)) {
+    b = buf[0];
+	}
+	return b;
+}
+
+void IMU_ReadGyro(byte port, byte i2cAddr, gyro & currGyro)
+{
+  byte message[];
+  byte buf[12];
+  int count;
+	int e;
+  byte nByteReady = 0;
+
+  ArrayBuild(message, i2cAddr, 0x53);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 6;
+  e = I2CBytes(port, message, count, buf);
+	if (e) {
+		currGyro.gx_l = buf[0];
+		currGyro.gx_h = buf[1];
+		currGyro.gy_l = buf[2];
+		currGyro.gy_h = buf[3];
+		currGyro.gz_l = buf[4];
+		currGyro.gz_h = buf[5];
+    currGyro.gx = IMU_MLBToInteger(buf[0], buf[1]);
+    currGyro.gy = IMU_MLBToInteger(buf[2], buf[3]);
+    currGyro.gz = IMU_MLBToInteger(buf[4], buf[5]);
+  } else {
+    currGyro.gx = 0;
+    currGyro.gy = 0;
+    currGyro.gz = 0;
+	}
+	currGyro.error = e;
+}
+
+void IMU_ReadMagneticField(byte port, byte i2cAddr, magnetic_field & currMF)
+{
+  byte message[];
+  byte buf[12];
+  int count;
+  byte nByteReady = 0;
+
+  ArrayBuild(message, i2cAddr, 0x4D);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 6;
+  if(I2CBytes(port, message, count, buf)) {
+    currMF.mx = IMU_MLBToInteger(buf[0], buf[1]);
+    currMF.my = IMU_MLBToInteger(buf[2], buf[3]);
+    currMF.mz = IMU_MLBToInteger(buf[4], buf[5]);
+  } else {
+    currMF.mx = 0;
+    currMF.my = 0;
+    currMF.mz = 0;
+	}
+}
+
+void IMU_ReadAcceleration(byte port, byte i2cAddr, accl & currAccl)
+{
+  byte message[];
+  byte buf[12];
+  int count, e;
+  byte nByteReady = 0;
+
+  ArrayBuild(message, i2cAddr, 0x42);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 3;
+  e = I2CBytes(port, message, count, buf);
+  if (e) {
+    currAccl.tx = buf[0] - 128;
+    currAccl.ty = buf[1] - 128;
+    currAccl.tz = buf[2] - 128;
+	} else {
+    currAccl.tx = 0;
+    currAccl.ty = 0;
+    currAccl.tz = 0;
+	}
+
+  ArrayBuild(message, i2cAddr, 0x45);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 6;
+  e = I2CBytes(port, message, count, buf);
+  if (e) {
+		currAccl.ax_l = buf[0];
+		currAccl.ax_h = buf[1];
+		currAccl.ay_l = buf[2];
+		currAccl.ay_h = buf[3];
+		currAccl.az_l = buf[4];
+		currAccl.az_h = buf[5];
+
+    currAccl.ax = IMU_MLBToInteger(buf[0], buf[1]);
+    currAccl.ay = IMU_MLBToInteger(buf[2], buf[3]);
+    currAccl.az = IMU_MLBToInteger(buf[4], buf[5]);
+  } else {
+    currAccl.ax = 0;
+    currAccl.ay = 0;
+    currAccl.az = 0;
+	}
+	currAccl.error = e;
+}
+
+void IMU_ResetAllCalibrations(byte port, byte i2cAddr)
+{
+	IMU_SendCommand(port, i2cAddr, 'R');
+}
+
+
+void IMU_BeginGyroCalibration(byte port, byte i2cAddr)
+{
+	IMU_SendCommand(port, i2cAddr, 'G');
+}
+
+void IMU_EndGyroCalibration(byte port, byte i2cAddr)
+{
+	IMU_SendCommand(port, i2cAddr, 'g');
+}
+
+void IMU_BeginCompassCalibration(byte port, byte i2cAddr)
+{
+	IMU_SendCommand(port, i2cAddr, 'C');
+}
+
+void IMU_EndCompassCalibration(byte port, byte i2cAddr)
+{
+	IMU_SendCommand(port, i2cAddr, 'c');
+}
+
+void IMU_Init(byte port)
+{
+  SetSensorLowspeed(port);
+}
+
+int IMU_ReadCompassHeading(byte port, byte i2cAddr)
+{
+	return (IMU_ReadInteger (port, i2cAddr, 0x4B));
+}
+
+void IMU_ReadCompassStruct(byte port, byte i2cAddr, cmps & currCmps)
+{
+  byte message[];
+  byte buf[12];
+  int count, e;
+  byte nByteReady = 0;
+
+  ArrayBuild(message, i2cAddr, 0x4B);
+  while (I2CStatus(port, nByteReady) ==  STAT_COMM_PENDING);
+  count = 2;
+  e = I2CBytes(port, message, count, buf);
+  if (e) {
+    currCmps.heading_l = buf[0];
+    currCmps.heading_h = buf[1];
+    currCmps.heading = IMU_MLBToInteger(buf[0], buf[1]);
+  } else {
+    currCmps.heading_l = 0;
+    currCmps.heading_h = 0;
+    currCmps.heading = 999;
+	}
+	currCmps.error = e;
+}
+
