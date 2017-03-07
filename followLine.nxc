@@ -1,0 +1,134 @@
+#define LEFT 0
+#define RIGHT 1
+
+#define NORMAL_SPEED 40
+#define MOVE_FORWARD NORMAL_SPEED, NORMAL_SPEED
+#define MOVE_LEFT -NORMAL_SPEED, NORMAL_SPEED
+#define MOVE_RIGHT NORMAL_SPEED, -NORMAL_SPEED
+
+#define MOTOR_LEFT OUT_B
+#define MOTOR_RIGHT OUT_C
+#define MOTOR_LEFTRIGHT OUT_BC
+
+#define C1 0xA0
+#define C2 0xA2
+#define C3 0xA4
+
+#define SENS_EV3_SPLITTER S1
+#define SENS_LEFT SENS_EV3_SPLITTER, C2
+#define SENS_RIGHT SENS_EV3_SPLITTER, C3
+#define SENS_OUTER_LEFT SENS_EV3_SPLITTER, C1
+#define SENS_OUTER_RIGHT S4
+
+#define MODE_GRAYSCALE 0x00
+#define MODE_COLOR 0x02
+
+#define COLOR_UNKNOWN 0
+#define COLOR_WHITE 1
+#define COLOR_BLACK 2
+#define COLOR_GREEN 3
+
+byte sens[2];
+byte sensOuter[2];
+byte mode;
+
+void Move (char left, char right) {
+  if (left == right) {
+    OnRevReg(MOTOR_LEFTRIGHT, left, OUT_REGMODE_SYNC);
+  } else {
+    OnRev(MOTOR_LEFT, left);
+    OnRev(MOTOR_RIGHT, right);
+  }
+}
+
+void SensorSplitterSetMode (byte port, byte subport, byte mode) {
+  // built the request
+  byte request[];
+  ArrayBuild(request, subport, 0x52, mode);
+
+  // wait until the splitter is ready
+  byte ready = 0;
+  until(I2CStatus(port, ready) != STAT_COMM_PENDING);
+
+  // write it
+  I2CWrite(port, 0, request);
+}
+
+void SetMode (byte newMode) {
+  mode = newMode;
+  SensorSplitterSetMode(SENS_LEFT, newMode);
+  SensorSplitterSetMode(SENS_RIGHT, newMode);
+}
+
+byte SensorSplitter (byte port, byte subport) {
+  // built the request
+  byte request[];
+  ArrayBuild(request, subport, 0x54);
+
+  // wait until the splitter is ready
+  byte ready = 0;
+  until(I2CStatus(port, ready) != STAT_COMM_PENDING);
+
+  // read the sensor values
+  int count = 2;
+  int sensorValue = 0;
+  unsigned byte buf[1];
+  if(I2CBytes(port, request, count, buf)) {
+    sensorValue = buf[0];// + (buf[1]<<8);
+  }
+  else {
+    PlayTone(139,200);
+    Move(0,0);
+    ClearScreen();
+    TextOut(0,LCD_LINE1,"Please reconnect");
+    TextOut(0,LCD_LINE2,"port " + NumToStr(port + 1) + "...       ");
+    TextOut(0,LCD_LINE3,"----------------");
+    TextOut(0,LCD_LINE4,"ERROR: I2C read ");
+    TextOut(0,LCD_LINE5,"failed          ");
+    until(I2CBytes(port, request, count, buf));
+    ClearScreen();
+  }
+  return sensorValue;
+}
+
+void Setup () {
+  SetSensorLowspeed(SENS_EV3_SPLITTER);
+  SetSensorLowspeed(SENS_OUTER_RIGHT);
+  SetMode(MODE_GRAYSCALE);
+}
+
+bool Update () {
+  sens[LEFT] = SensorSplitter(SENS_LEFT);
+  sens[RIGHT] = SensorSplitter(SENS_RIGHT);
+  sensOuter[LEFT] = SensorSplitter(SENS_OUTER_LEFT);
+  sensOuter[RIGHT] = SensorHTColorNum(SENS_OUTER_RIGHT);
+  return true;
+}
+
+void Debug () {
+  ClearScreen();
+  NumOut(0,LCD_LINE1, sensOuter[LEFT]);
+  NumOut(0,LCD_LINE2, sens[LEFT]);
+  NumOut(0,LCD_LINE3, sens[RIGHT]);
+  NumOut(0,LCD_LINE4, sensOuter[RIGHT]);
+}
+
+void FollowLine () {
+  if (sens[LEFT] < 15 && sens[RIGHT] < 15) {
+    Move(MOVE_FORWARD);
+  } else if (sens[LEFT] < 15) {
+    Move(MOVE_LEFT);
+  } else if (sens[RIGHT] < 15) {
+    Move(MOVE_RIGHT);
+  } else {
+    Move(MOVE_FORWARD);
+  }
+}
+
+task main () {
+  Setup();
+  while (Update()) {
+    Debug();
+    FollowLine();
+  }
+}
