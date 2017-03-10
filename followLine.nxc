@@ -40,7 +40,6 @@
 byte sens[2];
 byte sensOuter[2];
 byte mode;
-byte lastGreen = 0;
 
 void Move (char left, char right) {
   if (left == right) {
@@ -183,22 +182,26 @@ void GreenMove (bool dir) {
 
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
-
   MoveDir(dir, -NORMAL_SPEED, NORMAL_SPEED);
-  until (abs(MotorRotationCount(MOTOR_LEFT)) > 600);
+  until (abs(MotorRotationCount(MOTOR_LEFT)) > 500);
+  Move(0,0);
+
+  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 100);
+
+  ResetRotationCount(MOTOR_LEFT);
+  Wait(1);
+  MoveDir(dir, -NORMAL_SPEED, NORMAL_SPEED);
+  until (abs(MotorRotationCount(MOTOR_LEFT)) > 200);
   Move(0,0);
 
   MoveDir(!dir, -NORMAL_SPEED, NORMAL_SPEED);
   until(Update() && Debug() && sens[dir] == COLOR_BLACK);
-  lastGreen = 3;
 }
 
 void FollowLine () {
   if (sens[LEFT] == COLOR_GREEN) {
-    if (lastGreen > 0) return;
     GreenMove(LEFT);
   } else if (sens[RIGHT] == COLOR_GREEN) {
-    if (lastGreen > 0) return;
     GreenMove(RIGHT);
   }
 
@@ -211,8 +214,6 @@ void FollowLine () {
   } else {
     Move(MOVE_FORWARD);
   }
-
-  if (lastGreen > 0) lastGreen--;
 }
 
 task main () {
