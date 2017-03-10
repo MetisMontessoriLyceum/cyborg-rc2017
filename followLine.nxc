@@ -8,7 +8,7 @@
 
 #define MOTOR_LEFT OUT_B
 #define MOTOR_RIGHT OUT_C
-#define MOTOR_LEFTRIGHT OUT_BC
+#define MOTOR_BOTH OUT_BC
 
 #define C1 0xA0
 #define C2 0xA2
@@ -40,13 +40,22 @@
 byte sens[2];
 byte sensOuter[2];
 byte mode;
+byte lastGreen = 0;
 
 void Move (char left, char right) {
   if (left == right) {
-    OnRevReg(MOTOR_LEFTRIGHT, left, OUT_REGMODE_SYNC);
+    OnRevReg(MOTOR_BOTH, left, OUT_REGMODE_SYNC);
   } else {
     OnRev(MOTOR_LEFT, left);
     OnRev(MOTOR_RIGHT, right);
+  }
+}
+
+void MoveDir(bool dir, char inner, char outer) {
+  if (dir == LEFT) {
+    Move(inner, outer);
+  } else {
+    Move(outer, inner);
   }
 }
 
@@ -144,7 +153,8 @@ byte ReadSens (byte sensorID) {
         } else {
           return COLOR_WHITE;
         }
-      }
+      } // if this is not true, it executes the code below in the outer right
+        // case.
     case SENS_OUTER_RIGHT:
       return rawValue;
   }
@@ -158,16 +168,41 @@ bool Update () {
   return true;
 }
 
-void Debug () {
+bool Debug () {
   ClearScreen();
   NumOut(0,LCD_LINE1, sensOuter[RIGHT]);
   NumOut(30,LCD_LINE1, sens[RIGHT]);
   NumOut(60,LCD_LINE1, sens[LEFT]);
   NumOut(88,LCD_LINE1, sensOuter[LEFT]);
+  return true;
+}
+
+void GreenMove (bool dir) {
+  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 250);
+  Move(0,0);
+
+  ResetRotationCount(MOTOR_LEFT);
+  Wait(1);
+
+  MoveDir(dir, -NORMAL_SPEED, NORMAL_SPEED);
+  until (abs(MotorRotationCount(MOTOR_LEFT)) > 600);
+  Move(0,0);
+
+  MoveDir(!dir, -NORMAL_SPEED, NORMAL_SPEED);
+  until(Update() && Debug() && sens[dir] == COLOR_BLACK);
+  lastGreen = 3;
 }
 
 void FollowLine () {
-  if (sens[LEFT] == COLOR_BLACK && sens[RIGHT] == COLOR_BLACK) {
+  if (sens[LEFT] == COLOR_GREEN) {
+    if (lastGreen > 0) return;
+    GreenMove(LEFT);
+  } else if (sens[RIGHT] == COLOR_GREEN) {
+    if (lastGreen > 0) return;
+    GreenMove(RIGHT);
+  }
+
+  else if (sens[LEFT] == COLOR_BLACK && sens[RIGHT] == COLOR_BLACK) {
     Move(MOVE_FORWARD);
   } else if (sens[LEFT] == COLOR_BLACK) {
     Move(MOVE_LEFT);
@@ -176,6 +211,8 @@ void FollowLine () {
   } else {
     Move(MOVE_FORWARD);
   }
+
+  if (lastGreen > 0) lastGreen--;
 }
 
 task main () {
