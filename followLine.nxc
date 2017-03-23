@@ -3,8 +3,11 @@
 
 #define NORMAL_SPEED 40
 #define MOVE_FORWARD NORMAL_SPEED, NORMAL_SPEED
+#define MOVE_BACKWARD -NORMAL_SPEED, -NORMAL_SPEED
 #define MOVE_LEFT -NORMAL_SPEED, NORMAL_SPEED
 #define MOVE_RIGHT NORMAL_SPEED, -NORMAL_SPEED
+#define MOVE_INNER MOVE_LEFT // because MOVE_LEFT is confusing when used with MoveDir.
+#define MOVE_OUTER MOVE_RIGHT // useless at the moment, reserved for later use.
 
 #define MOTOR_LEFT OUT_B
 #define MOTOR_RIGHT OUT_C
@@ -198,7 +201,7 @@ void GreenMove (bool dir) {
 
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
-  MoveDir(dir, -NORMAL_SPEED, NORMAL_SPEED);
+  MoveDir(dir, MOVE_INNER);
   until (abs(MotorRotationCount(MOTOR_LEFT)) > 500);
   Move(0,0);
 
@@ -206,11 +209,11 @@ void GreenMove (bool dir) {
 
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
-  MoveDir(dir, -NORMAL_SPEED, NORMAL_SPEED);
+  MoveDir(dir, MOVE_INNER);
   until (abs(MotorRotationCount(MOTOR_LEFT)) > 200);
   Move(0,0);
 
-  MoveDir(!dir, -NORMAL_SPEED, NORMAL_SPEED);
+  MoveDir(!dir, MOVE_INNER);
   until(Update() && Debug() && sens[dir] == COLOR_BLACK);
 }
 
@@ -218,7 +221,7 @@ void OuterMove (bool dir) {
   RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 150);
   Move(0,0);
 
-  MoveDir(dir, -NORMAL_SPEED, NORMAL_SPEED);
+  MoveDir(dir, MOVE_INNER);
   until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
 }
 
@@ -226,14 +229,18 @@ void MoveRot (int rotationCount, char left, char right) {
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
   // false is LEFT, and true is RIGHT. (duh ;])
-  MoveDir(rotationCount < 0, -NORMAL_SPEED, NORMAL_SPEED);
-  until (abs(MotorRotationCount(MOTOR_LEFT)) > abs(rotationCount));
+  MoveDir(rotationCount < 0, left, right);
+  until(abs(MotorRotationCount(MOTOR_LEFT)) > abs(rotationCount));
 }
 
 void FollowLine () {
   if (Sensor(SENS_PORT_FRONT_BUMP) == 1) {
-    MoveRot(200, MOVE_LEFT);
-  } // ? = 90
+    MoveRot(260, MOVE_BACKWARD);
+    MoveRot(450, MOVE_LEFT);
+    Move(1.6*NORMAL_SPEED, 0.4*NORMAL_SPEED);
+    until(Update() && sens[RIGHT] == COLOR_BLACK);
+    MoveRot(250, MOVE_LEFT);
+  }
 
 
   if (sens[LEFT] == COLOR_GREEN) {
