@@ -19,11 +19,15 @@
 #define SENS_RIGHT 2
 #define SENS_OUTER_RIGHT 3
 
+#define SENS_FRONT_BUMP 4
+
 #define SENS_PORT_EV3_SPLITTER S1
 #define SENS_PORT_LEFT SENS_PORT_EV3_SPLITTER, C2
 #define SENS_PORT_RIGHT SENS_PORT_EV3_SPLITTER, C3
 #define SENS_PORT_OUTER_LEFT S4
 #define SENS_PORT_OUTER_RIGHT SENS_PORT_EV3_SPLITTER, C1
+
+#define SENS_PORT_FRONT_BUMP IN_2
 
 #define MODE_GRAYSCALE 0x00
 #define MODE_COLOR 0x02
@@ -122,6 +126,8 @@ void Setup () {
   SetSensorLowspeed(SENS_PORT_OUTER_LEFT);
   SetMode(MODE_GRAYSCALE);
   SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
+
+  SetSensorTouch(SENS_PORT_FRONT_BUMP);
 }
 
 byte ReadSens (byte sensorID) {
@@ -216,7 +222,20 @@ void OuterMove (bool dir) {
   until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
 }
 
+void MoveRot (int rotationCount, char left, char right) {
+  ResetRotationCount(MOTOR_LEFT);
+  Wait(1);
+  // false is LEFT, and true is RIGHT. (duh ;])
+  MoveDir(rotationCount < 0, -NORMAL_SPEED, NORMAL_SPEED);
+  until (abs(MotorRotationCount(MOTOR_LEFT)) > abs(rotationCount));
+}
+
 void FollowLine () {
+  if (Sensor(SENS_PORT_FRONT_BUMP) == 1) {
+    MoveRot(200, MOVE_LEFT);
+  } // ? = 90
+
+
   if (sens[LEFT] == COLOR_GREEN) {
     GreenMove(LEFT);
   } else if (sens[RIGHT] == COLOR_GREEN) {
