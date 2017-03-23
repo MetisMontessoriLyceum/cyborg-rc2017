@@ -40,6 +40,7 @@
 byte sens[2];
 byte sensOuter[2];
 byte mode;
+unsigned long debugTick = 0;
 
 void Move (char left, char right) {
   if (left == right) {
@@ -118,8 +119,9 @@ byte SensorSplitter (byte port, byte subport) {
 
 void Setup () {
   SetSensorLowspeed(SENS_PORT_EV3_SPLITTER);
-  SetSensorLowspeed(SENS_PORT_OUTER_RIGHT);
+  SetSensorLowspeed(SENS_PORT_OUTER_LEFT);
   SetMode(MODE_GRAYSCALE);
+  SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
 }
 
 byte ReadSens (byte sensorID) {
@@ -143,7 +145,13 @@ byte ReadSens (byte sensorID) {
   // unreadable.
   switch (sensorID) {
     case SENS_OUTER_LEFT:
-      return rawValue; // TODO
+      if (rawValue == 4) {
+        return COLOR_GREEN;
+      } else if (rawValue >= 11) {
+        return COLOR_WHITE;
+      } else {
+        return COLOR_BLACK;
+      }
     case SENS_LEFT:
     case SENS_RIGHT:
       if (mode == MODE_GRAYSCALE) {
@@ -173,6 +181,8 @@ bool Debug () {
   NumOut(30,LCD_LINE1, sens[RIGHT]);
   NumOut(60,LCD_LINE1, sens[LEFT]);
   NumOut(88,LCD_LINE1, sensOuter[LEFT]);
+  NumOut(0, LCD_LINE2, debugTick);
+  debugTick++;
   return true;
 }
 
@@ -198,11 +208,25 @@ void GreenMove (bool dir) {
   until(Update() && Debug() && sens[dir] == COLOR_BLACK);
 }
 
+void OuterMove (bool dir) {
+  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 150);
+  Move(0,0);
+
+  MoveDir(dir, -NORMAL_SPEED, NORMAL_SPEED);
+  until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
+}
+
 void FollowLine () {
   if (sens[LEFT] == COLOR_GREEN) {
     GreenMove(LEFT);
   } else if (sens[RIGHT] == COLOR_GREEN) {
     GreenMove(RIGHT);
+  }
+
+  else if (sensOuter[LEFT] == COLOR_BLACK) {
+    OuterMove(LEFT);
+  } else if (sensOuter[RIGHT] == COLOR_BLACK) {
+    OuterMove(RIGHT);
   }
 
   else if (sens[LEFT] == COLOR_BLACK && sens[RIGHT] == COLOR_BLACK) {
@@ -211,7 +235,9 @@ void FollowLine () {
     Move(MOVE_LEFT);
   } else if (sens[RIGHT] == COLOR_BLACK) {
     Move(MOVE_RIGHT);
-  } else {
+  }
+
+  else {
     Move(MOVE_FORWARD);
   }
 }
