@@ -186,6 +186,17 @@ bool Debug () {
   return true;
 }
 
+// Moeten we niet een soort extra, leuke functie inbouwen?
+// Zoals een dansje voor als we winnen?
+
+void Dance(bool weWon) {
+  if (weWon) {
+    Move(100,-30);
+  } else {
+    Move(-5,-5);
+  }
+}
+
 void GreenMove (bool dir) {
   RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 250);
   Move(0,0);
