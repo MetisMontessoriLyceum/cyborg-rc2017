@@ -46,11 +46,30 @@ byte SensorSplitter (byte port, byte subport) {
   return sensorValue;
 }
 
+byte SensorHTSmartColor (byte sensPort) {
+  byte colorNum;
+  byte red;
+  byte green;
+  byte blue;
+  ReadSensorHTColor(sensPort, colorNum, red, green, blue);
+
+  if (red < 50 && green < 50 && blue < 50) {
+    return COLOR_BLACK;
+  } else {
+    return COLOR_WHITE;
+  }
+
+  /*ClearScreen();
+  NumOut(0,LCD_LINE1,red);
+  NumOut(0,LCD_LINE2,green);
+  NumOut(0,LCD_LINE3,blue);*/
+}
+
 byte ReadSens (byte sensorID) {
   byte rawValue;
   switch (sensorID) {
     case SENS_OUTER_LEFT:
-      rawValue = SensorHTColorNum(SENS_PORT_OUTER_LEFT);
+      rawValue = SensorHTSmartColor(SENS_PORT_OUTER_LEFT);
       break;
     case SENS_LEFT:
       rawValue = SensorSplitter(SENS_PORT_LEFT);
@@ -67,13 +86,7 @@ byte ReadSens (byte sensorID) {
   // unreadable.
   switch (sensorID) {
     case SENS_OUTER_LEFT:
-      if (rawValue == 4) {
-        return COLOR_GREEN;
-      } else if (rawValue >= 11) {
-        return COLOR_WHITE;
-      } else {
-        return COLOR_BLACK;
-      }
+      return rawValue;
     case SENS_LEFT:
     case SENS_RIGHT:
       if (mode == MODE_GRAYSCALE) {
