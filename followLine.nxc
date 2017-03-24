@@ -78,15 +78,21 @@ void OuterMove (bool dir) {
   until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
 }
 
+void AvoidObstacle () {
+  MoveRot(260, MOVE_BACKWARD);
+  MoveRot(450, MOVE_LEFT);
+  Move(1.5*NORMAL_SPEED, 0.5*NORMAL_SPEED);
+  until(Update() && sens[RIGHT] == COLOR_BLACK);
+  MoveRot(200, MOVE_FORWARD);
+  Move(MOVE_LEFT);
+  until(Update() && sens[RIGHT] == COLOR_BLACK);
+  MoveRot(260, MOVE_BACKWARD);
+}
+
 void FollowLine () {
   if (Sensor(SENS_PORT_FRONT_BUMP) == 1) {
-    MoveRot(260, MOVE_BACKWARD);
-    MoveRot(450, MOVE_LEFT);
-    Move(1.5*NORMAL_SPEED, 0.5*NORMAL_SPEED);
-    until(Update() && sens[RIGHT] == COLOR_BLACK);
-    MoveRot(250, MOVE_LEFT);
+    AvoidObstacle();
   }
-
 
   if (sens[LEFT] == COLOR_GREEN) {
     GreenMove(LEFT);
