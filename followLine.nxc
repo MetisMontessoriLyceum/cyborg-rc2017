@@ -3,6 +3,8 @@
 #include "_sensor.nxc"
 #include "_generic.nxc"
 
+// always check to see if your code has: ';' instead of ';'
+
 void GreenMove (bool dir) {
   RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 250);
   Move(0,0);
