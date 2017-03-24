@@ -1,0 +1,24 @@
+void Move (char left, char right) {
+  if (left == right) {
+    OnRevReg(MOTOR_BOTH, left, OUT_REGMODE_SYNC);
+  } else {
+    OnRev(MOTOR_LEFT, left);
+    OnRev(MOTOR_RIGHT, right);
+  }
+}
+
+void MoveDir(bool dir, char inner, char outer) {
+  if (dir == LEFT) {
+    Move(inner, outer);
+  } else {
+    Move(outer, inner);
+  }
+}
+
+void MoveRot (int rotationCount, char left, char right) {
+  ResetRotationCount(MOTOR_LEFT);
+  Wait(1);
+  // false is LEFT, and true is RIGHT. (duh ;])
+  MoveDir(rotationCount < 0, left, right);
+  until(abs(MotorRotationCount(MOTOR_LEFT)) > abs(rotationCount));
+}
