@@ -237,7 +237,7 @@ void FollowLine () {
   if (Sensor(SENS_PORT_FRONT_BUMP) == 1) {
     MoveRot(260, MOVE_BACKWARD);
     MoveRot(450, MOVE_LEFT);
-    Move(1.6*NORMAL_SPEED, 0.4*NORMAL_SPEED);
+    Move(1.5*NORMAL_SPEED, 0.5*NORMAL_SPEED);
     until(Update() && sens[RIGHT] == COLOR_BLACK);
     MoveRot(250, MOVE_LEFT);
   }
