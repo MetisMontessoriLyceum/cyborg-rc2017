@@ -1,0 +1,45 @@
+#define LEFT 0
+#define RIGHT 1
+
+#define NORMAL_SPEED 40
+#define MOVE_FORWARD NORMAL_SPEED, NORMAL_SPEED
+#define MOVE_BACKWARD -NORMAL_SPEED, -NORMAL_SPEED
+#define MOVE_LEFT -NORMAL_SPEED, NORMAL_SPEED
+#define MOVE_RIGHT NORMAL_SPEED, -NORMAL_SPEED
+#define MOVE_INNER MOVE_LEFT // because MOVE_LEFT is confusing when used with MoveDir.
+#define MOVE_OUTER MOVE_RIGHT // useless at the moment, reserved for later use.
+
+#define MOTOR_LEFT OUT_B
+#define MOTOR_RIGHT OUT_C
+#define MOTOR_BOTH OUT_BC
+
+#define C1 0xA0
+#define C2 0xA2
+#define C3 0xA4
+
+#define SENS_OUTER_LEFT 0
+#define SENS_LEFT 1
+#define SENS_RIGHT 2
+#define SENS_OUTER_RIGHT 3
+
+#define SENS_FRONT_BUMP 4
+
+#define SENS_PORT_EV3_SPLITTER S1
+#define SENS_PORT_LEFT SENS_PORT_EV3_SPLITTER, C2
+#define SENS_PORT_RIGHT SENS_PORT_EV3_SPLITTER, C3
+#define SENS_PORT_OUTER_LEFT S4
+#define SENS_PORT_OUTER_RIGHT SENS_PORT_EV3_SPLITTER, C1
+
+#define SENS_PORT_FRONT_BUMP IN_2
+
+#define MODE_GRAYSCALE 0x00
+#define MODE_COLOR 0x02
+
+#define COLOR_UNKNOWN 0
+#define COLOR_BLACK 1
+#define COLOR_BLUE 2
+#define COLOR_GREEN 3
+#define COLOR_YELLOW 4
+#define COLOR_RED 5
+#define COLOR_WHITE 6
+#define COLOR_BROWN 7
