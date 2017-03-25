@@ -1,0 +1,20 @@
+#include "_defines.nxc"
+#include "_move.nxc"
+#include "_sensor.nxc"
+#include "_debug.nxc"
+#include "_generic.nxc"
+
+task main() {
+  Setup();
+  while (Update()) {
+    if (ButtonPressed(BTNRIGHT)) SetMode(MODE_COLOR);
+    else if (ButtonPressed(BTNLEFT)) SetMode(MODE_GRAYSCALE);
+    Debug();
+    if (mode == MODE_COLOR) {
+      TextOut(0,LCD_LINE3,"MODE_COLOR    ");
+    } else {
+      TextOut(0,LCD_LINE3,"MODE_GRAYSCALE");
+    }
+    Wait(200);
+  }
+}
