@@ -24,6 +24,8 @@ void GreenMove (bool dir) {
 
   MoveDir(!dir, MOVE_INNER);
   until(Update() && Debug() && sens[dir] == COLOR_BLACK);
+  MoveDir(dir, MOVE_INNER);
+  until(Update() && Debug() && sens[dir] != COLOR_BLACK);
 }
 
 void OuterMove (bool dir) {
@@ -32,6 +34,8 @@ void OuterMove (bool dir) {
 
   MoveDir(dir, MOVE_INNER);
   until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
+  MoveDir(!dir, MOVE_INNER);
+  until(Update() && Debug() && sens[!dir] != COLOR_BLACK);
 }
 
 void AvoidObstacle () {
