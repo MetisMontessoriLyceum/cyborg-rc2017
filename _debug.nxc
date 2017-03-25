@@ -1,0 +1,85 @@
+#define VDEBUG_FORWARD 0
+#define VDEBUG_LEFT 1
+#define VDEBUG_RIGHT 2
+#define VDEBUG_OUTER_LEFT 3
+#define VDEBUG_OUTER_RIGHT 4
+#define VDEBUG_GREEN_LEFT 5
+#define VDEBUG_GREEN_RIGHT 6
+
+unsigned long debugTick = 0;
+byte lastVDebugType = 255;
+
+bool Debug () {
+  ClearLine(LCD_LINE1);
+  ClearLine(LCD_LINE2);
+  NumOut(0,LCD_LINE1, sensOuter[RIGHT]);
+  NumOut(30,LCD_LINE1, sens[RIGHT]);
+  NumOut(60,LCD_LINE1, sens[LEFT]);
+  NumOut(88,LCD_LINE1, sensOuter[LEFT]);
+  NumOut(0, LCD_LINE2, debugTick);
+  debugTick++;
+  return true;
+}
+
+void VisualDebug (byte type) {
+  if (type == lastVDebugType) { return; }
+  lastVDebugType = type;
+  switch (type) {
+    case VDEBUG_FORWARD:
+      TextOut(0,LCD_LINE3,"       ||       ");
+      TextOut(0,LCD_LINE4,"       ||       ");
+      TextOut(0,LCD_LINE5,"       ||       ");
+      TextOut(0,LCD_LINE6,"       ||       ");
+      TextOut(0,LCD_LINE7,"       ||       ");
+      TextOut(0,LCD_LINE8,"       ||       ");
+      return;
+    case VDEBUG_LEFT:
+      TextOut(0,LCD_LINE3,"       ||       ");
+      TextOut(0,LCD_LINE4,"       ||       ");
+      TextOut(0,LCD_LINE5,"       ||       ");
+      TextOut(0,LCD_LINE6,"       \\        ");
+      TextOut(0,LCD_LINE7,"        \\       ");
+      TextOut(0,LCD_LINE8,"         \\      ");
+      return;
+    case VDEBUG_RIGHT:
+      TextOut(0,LCD_LINE3,"       ||       ");
+      TextOut(0,LCD_LINE4,"       ||       ");
+      TextOut(0,LCD_LINE5,"       ||       ");
+      TextOut(0,LCD_LINE6,"       //       ");
+      TextOut(0,LCD_LINE7,"      //        ");
+      TextOut(0,LCD_LINE8,"     //         ");
+      return;
+    case VDEBUG_OUTER_LEFT:
+      TextOut(0,LCD_LINE3,"       ||       ");
+      TextOut(0,LCD_LINE4,"       ||       ");
+      TextOut(0,LCD_LINE5,"       ||       ");
+      TextOut(0,LCD_LINE6,"       \\--------");
+      TextOut(0,LCD_LINE7,"                ");
+      TextOut(0,LCD_LINE8,"                ");
+      return;
+    case VDEBUG_OUTER_RIGHT:
+      TextOut(0,LCD_LINE3,"       ||       ");
+      TextOut(0,LCD_LINE4,"       ||       ");
+      TextOut(0,LCD_LINE5,"       ||       ");
+      TextOut(0,LCD_LINE6,"--------/       ");
+      TextOut(0,LCD_LINE7,"                ");
+      TextOut(0,LCD_LINE8,"                ");
+      return;
+    case VDEBUG_GREEN_LEFT:
+      TextOut(0,LCD_LINE3,"       ||       ");
+      TextOut(0,LCD_LINE4,"       ||##     ");
+      TextOut(0,LCD_LINE5,"       ||##     ");
+      TextOut(0,LCD_LINE6,"       \\--------");
+      TextOut(0,LCD_LINE7,"                ");
+      TextOut(0,LCD_LINE8,"                ");
+      return;
+    case VDEBUG_GREEN_RIGHT:
+      TextOut(0,LCD_LINE3,"       ||       ");
+      TextOut(0,LCD_LINE4,"     ##||       ");
+      TextOut(0,LCD_LINE5,"     ##||       ");
+      TextOut(0,LCD_LINE6,"--------/       ");
+      TextOut(0,LCD_LINE7,"                ");
+      TextOut(0,LCD_LINE8,"                ");
+      return;
+  }
+}

@@ -1,6 +1,7 @@
 #include "_defines.nxc"
 #include "_move.nxc"
 #include "_sensor.nxc"
+#include "_debug.nxc"
 #include "_generic.nxc"
 
 void GreenMove (bool dir) {
@@ -50,26 +51,34 @@ void FollowLine () {
   }
 
   if (sens[LEFT] == COLOR_GREEN) {
+    VisualDebug(VDEBUG_GREEN_LEFT);
     GreenMove(LEFT);
   } else if (sens[RIGHT] == COLOR_GREEN) {
+    VisualDebug(VDEBUG_GREEN_RIGHT);
     GreenMove(RIGHT);
   }
 
   else if (sensOuter[LEFT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_OUTER_LEFT);
     OuterMove(LEFT);
   } else if (sensOuter[RIGHT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_OUTER_RIGHT);
     OuterMove(RIGHT);
   }
 
   else if (sens[LEFT] == COLOR_BLACK && sens[RIGHT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_FORWARD);
     Move(MOVE_FORWARD);
   } else if (sens[LEFT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_LEFT);
     Move(MOVE_LEFT);
   } else if (sens[RIGHT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_RIGHT);
     Move(MOVE_RIGHT);
   }
 
   else {
+    VisualDebug(VDEBUG_FORWARD);
     Move(MOVE_FORWARD);
   }
 }

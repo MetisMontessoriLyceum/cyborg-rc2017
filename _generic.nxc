@@ -1,5 +1,3 @@
-unsigned long debugTick = 0;
-
 void Setup () {
   SetSensorLowspeed(SENS_PORT_EV3_SPLITTER);
   SetSensorLowspeed(SENS_PORT_OUTER_LEFT);
@@ -14,16 +12,5 @@ bool Update () {
   sens[LEFT] = ReadSens(SENS_LEFT);
   sens[RIGHT] = ReadSens(SENS_RIGHT);
   sensOuter[RIGHT] = ReadSens(SENS_OUTER_RIGHT);
-  return true;
-}
-
-bool Debug () {
-  ClearScreen();
-  NumOut(0,LCD_LINE1, sensOuter[RIGHT]);
-  NumOut(30,LCD_LINE1, sens[RIGHT]);
-  NumOut(60,LCD_LINE1, sens[LEFT]);
-  NumOut(88,LCD_LINE1, sensOuter[LEFT]);
-  NumOut(0, LCD_LINE2, debugTick);
-  debugTick++;
   return true;
 }
