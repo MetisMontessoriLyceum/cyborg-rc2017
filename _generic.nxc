@@ -1,0 +1,16 @@
+void Setup () {
+  SetSensorLowspeed(SENS_PORT_EV3_SPLITTER);
+  SetSensorLowspeed(SENS_PORT_OUTER_LEFT);
+  SetMode(MODE_GRAYSCALE);
+  SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
+
+  SetSensorTouch(SENS_PORT_FRONT_BUMP);
+}
+
+bool Update () {
+  sensOuter[LEFT] = ReadSens(SENS_OUTER_LEFT);
+  sens[LEFT] = ReadSens(SENS_LEFT);
+  sens[RIGHT] = ReadSens(SENS_RIGHT);
+  sensOuter[RIGHT] = ReadSens(SENS_OUTER_RIGHT);
+  return true;
+}

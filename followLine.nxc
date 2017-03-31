@@ -1,199 +1,8 @@
-#define LEFT 0
-#define RIGHT 1
-
-#define NORMAL_SPEED 40
-#define MOVE_FORWARD NORMAL_SPEED, NORMAL_SPEED
-#define MOVE_BACKWARD -NORMAL_SPEED, -NORMAL_SPEED
-#define MOVE_LEFT -NORMAL_SPEED, NORMAL_SPEED
-#define MOVE_RIGHT NORMAL_SPEED, -NORMAL_SPEED
-#define MOVE_INNER MOVE_LEFT // because MOVE_LEFT is confusing when used with MoveDir.
-#define MOVE_OUTER MOVE_RIGHT // useless at the moment, reserved for later use.
-
-#define MOTOR_LEFT OUT_B
-#define MOTOR_RIGHT OUT_C
-#define MOTOR_BOTH OUT_BC
-
-#define C1 0xA0
-#define C2 0xA2
-#define C3 0xA4
-
-#define SENS_OUTER_LEFT 0
-#define SENS_LEFT 1
-#define SENS_RIGHT 2
-#define SENS_OUTER_RIGHT 3
-
-#define SENS_FRONT_BUMP 4
-
-#define SENS_PORT_EV3_SPLITTER S1
-#define SENS_PORT_LEFT SENS_PORT_EV3_SPLITTER, C2
-#define SENS_PORT_RIGHT SENS_PORT_EV3_SPLITTER, C3
-#define SENS_PORT_OUTER_LEFT S4
-#define SENS_PORT_OUTER_RIGHT SENS_PORT_EV3_SPLITTER, C1
-
-#define SENS_PORT_FRONT_BUMP IN_2
-
-#define MODE_GRAYSCALE 0x00
-#define MODE_COLOR 0x02
-
-#define COLOR_UNKNOWN 0
-#define COLOR_BLACK 1
-#define COLOR_BLUE 2
-#define COLOR_GREEN 3
-#define COLOR_YELLOW 4
-#define COLOR_RED 5
-#define COLOR_WHITE 6
-#define COLOR_BROWN 7
-
-byte sens[2];
-byte sensOuter[2];
-byte mode;
-unsigned long debugTick = 0;
-
-void Move (char left, char right) {
-  if (left == right) {
-    OnRevReg(MOTOR_BOTH, left, OUT_REGMODE_SYNC);
-  } else {
-    OnRev(MOTOR_LEFT, left);
-    OnRev(MOTOR_RIGHT, right);
-  }
-}
-
-void MoveDir(bool dir, char inner, char outer) {
-  if (dir == LEFT) {
-    Move(inner, outer);
-  } else {
-    Move(outer, inner);
-  }
-}
-
-void SensorSplitterSetMode (byte port, byte subport, byte mode) {
-  // built the request
-  byte request[];
-  ArrayBuild(request, subport, 0x52, mode);
-
-  // wait until the splitter is ready
-  byte ready = 0;
-  until(I2CStatus(port, ready) != STAT_COMM_PENDING);
-
-  // write it
-  I2CWrite(port, 0, request);
-}
-
-void SetMode (byte newMode) {
-  mode = newMode;
-  SensorSplitterSetMode(SENS_PORT_LEFT, newMode);
-  SensorSplitterSetMode(SENS_PORT_RIGHT, newMode);
-}
-
-void ToggleMode () {
-  if (mode == MODE_GRAYSCALE) {
-    SetMode(MODE_COLOR);
-  } else {
-    SetMode(MODE_GRAYSCALE);
-  }
-}
-
-byte SensorSplitter (byte port, byte subport) {
-  // built the request
-  byte request[];
-  ArrayBuild(request, subport, 0x54);
-
-  // wait until the splitter is ready
-  byte ready = 0;
-  until(I2CStatus(port, ready) != STAT_COMM_PENDING);
-
-  // read the sensor values
-  int count = 2;
-  int sensorValue = 0;
-  unsigned byte buf[1];
-  if(I2CBytes(port, request, count, buf)) {
-    sensorValue = buf[0];// + (buf[1]<<8);
-  }
-  else {
-    PlayTone(139,200);
-    Move(0,0);
-    ClearScreen();
-    TextOut(0,LCD_LINE1,"Please reconnect");
-    TextOut(0,LCD_LINE2,"port " + NumToStr(port + 1) + "...       ");
-    TextOut(0,LCD_LINE3,"----------------");
-    TextOut(0,LCD_LINE4,"ERROR: I2C read ");
-    TextOut(0,LCD_LINE5,"failed          ");
-    until(I2CBytes(port, request, count, buf));
-    ClearScreen();
-  }
-  return sensorValue;
-}
-
-void Setup () {
-  SetSensorLowspeed(SENS_PORT_EV3_SPLITTER);
-  SetSensorLowspeed(SENS_PORT_OUTER_LEFT);
-  SetMode(MODE_GRAYSCALE);
-  SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
-
-  SetSensorTouch(SENS_PORT_FRONT_BUMP);
-}
-
-byte ReadSens (byte sensorID) {
-  byte rawValue;
-  switch (sensorID) {
-    case SENS_OUTER_LEFT:
-      rawValue = SensorHTColorNum(SENS_PORT_OUTER_LEFT);
-      break;
-    case SENS_LEFT:
-      rawValue = SensorSplitter(SENS_PORT_LEFT);
-      break;
-    case SENS_RIGHT:
-      rawValue = SensorSplitter(SENS_PORT_RIGHT);
-      break;
-    case SENS_OUTER_RIGHT:
-      rawValue = SensorSplitter(SENS_PORT_OUTER_RIGHT);
-      break;
-  }
-
-  // TODO: This switch statement makes use of fallthrou and is therefor
-  // unreadable.
-  switch (sensorID) {
-    case SENS_OUTER_LEFT:
-      if (rawValue == 4) {
-        return COLOR_GREEN;
-      } else if (rawValue >= 11) {
-        return COLOR_WHITE;
-      } else {
-        return COLOR_BLACK;
-      }
-    case SENS_LEFT:
-    case SENS_RIGHT:
-      if (mode == MODE_GRAYSCALE) {
-        if (rawValue < 15) {
-          return COLOR_BLACK;
-        } else {
-          return COLOR_WHITE;
-        }
-      } // if this is not true, it executes the code below in the outer right
-        // case.
-    case SENS_OUTER_RIGHT:
-      return rawValue;
-  }
-}
-
-bool Update () {
-  sensOuter[LEFT] = ReadSens(SENS_OUTER_LEFT);
-  sens[LEFT] = ReadSens(SENS_LEFT);
-  sens[RIGHT] = ReadSens(SENS_RIGHT);
-  sensOuter[RIGHT] = ReadSens(SENS_OUTER_RIGHT);
-  return true;
-}
-
-bool Debug () {
-  ClearScreen();
-  NumOut(0,LCD_LINE1, sensOuter[RIGHT]);
-  NumOut(30,LCD_LINE1, sens[RIGHT]);
-  NumOut(60,LCD_LINE1, sens[LEFT]);
-  NumOut(88,LCD_LINE1, sensOuter[LEFT]);
-  NumOut(0, LCD_LINE2, debugTick);
-  debugTick++;
-  return true;
-}
+#include "_defines.nxc"
+#include "_move.nxc"
+#include "_sensor.nxc"
+#include "_debug.nxc"
+#include "_generic.nxc"
 
 void GreenMove (bool dir) {
   RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 250);
@@ -215,6 +24,8 @@ void GreenMove (bool dir) {
 
   MoveDir(!dir, MOVE_INNER);
   until(Update() && Debug() && sens[dir] == COLOR_BLACK);
+  MoveDir(dir, MOVE_INNER);
+  until(Update() && Debug() && sens[dir] != COLOR_BLACK);
 }
 
 void OuterMove (bool dir) {
@@ -223,47 +34,55 @@ void OuterMove (bool dir) {
 
   MoveDir(dir, MOVE_INNER);
   until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
+  MoveDir(!dir, MOVE_INNER);
+  until(Update() && Debug() && sens[!dir] != COLOR_BLACK);
 }
 
-void MoveRot (int rotationCount, char left, char right) {
-  ResetRotationCount(MOTOR_LEFT);
-  Wait(1);
-  // false is LEFT, and true is RIGHT. (duh ;])
-  MoveDir(rotationCount < 0, left, right);
-  until(abs(MotorRotationCount(MOTOR_LEFT)) > abs(rotationCount));
+void AvoidObstacle () {
+  MoveRot(260, MOVE_BACKWARD);
+  MoveRot(450, MOVE_LEFT);
+  Move(1.5*NORMAL_SPEED, 0.5*NORMAL_SPEED);
+  until(Update() && sens[RIGHT] == COLOR_BLACK);
+  MoveRot(200, MOVE_FORWARD);
+  Move(MOVE_LEFT);
+  until(Update() && sens[RIGHT] && sens[LEFT] == COLOR_BLACK);
+  MoveRot(260, MOVE_BACKWARD);
 }
 
 void FollowLine () {
   if (Sensor(SENS_PORT_FRONT_BUMP) == 1) {
-    MoveRot(260, MOVE_BACKWARD);
-    MoveRot(450, MOVE_LEFT);
-    Move(1.6*NORMAL_SPEED, 0.4*NORMAL_SPEED);
-    until(Update() && sens[RIGHT] == COLOR_BLACK);
-    MoveRot(250, MOVE_LEFT);
+    AvoidObstacle();
   }
 
-
   if (sens[LEFT] == COLOR_GREEN) {
+    VisualDebug(VDEBUG_GREEN_LEFT);
     GreenMove(LEFT);
   } else if (sens[RIGHT] == COLOR_GREEN) {
+    VisualDebug(VDEBUG_GREEN_RIGHT);
     GreenMove(RIGHT);
   }
 
   else if (sensOuter[LEFT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_OUTER_LEFT);
     OuterMove(LEFT);
   } else if (sensOuter[RIGHT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_OUTER_RIGHT);
     OuterMove(RIGHT);
   }
 
   else if (sens[LEFT] == COLOR_BLACK && sens[RIGHT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_FORWARD);
     Move(MOVE_FORWARD);
   } else if (sens[LEFT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_LEFT);
     Move(MOVE_LEFT);
   } else if (sens[RIGHT] == COLOR_BLACK) {
+    VisualDebug(VDEBUG_RIGHT);
     Move(MOVE_RIGHT);
   }
 
   else {
+    VisualDebug(VDEBUG_FORWARD);
     Move(MOVE_FORWARD);
   }
 }
