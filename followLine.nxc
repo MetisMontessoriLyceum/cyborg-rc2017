@@ -41,7 +41,7 @@ void AvoidObstacle () {
   until(Update() && sens[RIGHT] == COLOR_BLACK);
   MoveRot(200, MOVE_FORWARD);
   Move(MOVE_LEFT);
-  until(Update() && sens[RIGHT] == COLOR_BLACK);
+  until(Update() && sens[RIGHT] && sens[LEFT] == COLOR_BLACK);
   MoveRot(260, MOVE_BACKWARD);
 }
 
