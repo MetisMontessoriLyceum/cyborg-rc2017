@@ -1,0 +1,5 @@
+#include "_defines.nxc"
+#include "_move.nxc"
+#include "_sensor.nxc"
+#include "_debug.nxc"
+#include "_generic.nxc"
