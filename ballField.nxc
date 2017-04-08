@@ -28,7 +28,7 @@ void FollowWall (byte dir) {
         MoveRot(80, -50, -50);
         MoveDirRot(!dir, 400, MOVE_INNER);
         break;
-      } else if (sensBumper[LEFT]) {
+      } else if (sensBumper[dir]) {
         MoveDirRot(!dir, 230, MOVE_INNER);
         break;
       }
@@ -38,5 +38,6 @@ void FollowWall (byte dir) {
 
 task main () {
   Setup();
-  FollowWall(LEFT);
+  FollowWall(LEFT); // TODO: change this to detect a wall and follow related to 
+                    // that...
 }
