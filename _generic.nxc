@@ -4,10 +4,10 @@ void Setup () {
   SetMode(MODE_GRAYSCALE);
   SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
 
-  SetSensorTouch(SENS_PORT_LEFT_BUMP);
-  SetSensorTouch(SENS_PORT_FRONT_BUMP);
+  /*SetSensorTouch(SENS_PORT_LEFT_BUMP);
+  SetSensorTouch(SENS_PORT_FRONT_BUMP);*/
 
-  SetSensorType(PORT_TMUX, IN_TYPE_LIGHT_INACTIVE);
+  SetSensorType(TOUCH_MULTI_PORT, IN_TYPE_LIGHT_INACTIVE);
 }
 
 bool Update () {
@@ -16,8 +16,12 @@ bool Update () {
   sens[RIGHT] = ReadSens(SENS_RIGHT);
   sensOuter[RIGHT] = ReadSens(SENS_OUTER_RIGHT);
 
-  ReadSensorHTTouchMultiplexer(TOUCH_MULTI_PORT, sensBumper[LEFT], sensBumper[CENTER], sensBumber[RIGHT], ballContact);
+  byte temp1,temp2,temp3;
+  ReadSensorHTTouchMultiplexer(TOUCH_MULTI_PORT, temp1, temp2, temp3, ballContact);
 
+  sensBumper[LEFT] = temp1;
+  sensBumper[RIGHT] = temp3;
+  sensBumper[CENTER] = temp2;
   /*sensBumper[LEFT] = Sensor(SENS_PORT_LEFT_BUMP);
   sensBumper[RIGHT] = false;
   sensBumper[CENTER] = Sensor(SENS_PORT_FRONT_BUMP);*/

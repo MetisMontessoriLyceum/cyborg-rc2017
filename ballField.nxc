@@ -24,7 +24,7 @@ void FollowWall (byte dir) {
         startCenterBumpTick = 0;
       }
 
-      if (sensBumper[CENTER] && sensBumper[LEFT]) {
+      if (sensBumper[CENTER] && ( sensBumper[LEFT] || sensBumper[RIGHT] ) ) {
         MoveRot(80, -50, -50);
         MoveDirRot(!dir, 400, MOVE_INNER);
         break;
