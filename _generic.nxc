@@ -16,7 +16,7 @@ bool Update () {
   sens[RIGHT] = ReadSens(SENS_RIGHT);
   sensOuter[RIGHT] = ReadSens(SENS_OUTER_RIGHT);
 
-  ReadSensorHTTouchMultiplexer(PORT_TMUX, sensBumper[LEFT], sensBumper[CENTER], sensBumber[RIGHT], ballContact);
+  ReadSensorHTTouchMultiplexer(TOUCH_MULTI_PORT, sensBumper[LEFT], sensBumper[CENTER], sensBumber[RIGHT], ballContact);
 
   /*sensBumper[LEFT] = Sensor(SENS_PORT_LEFT_BUMP);
   sensBumper[RIGHT] = false;
