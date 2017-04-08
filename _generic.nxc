@@ -6,6 +6,8 @@ void Setup () {
 
   SetSensorTouch(SENS_PORT_LEFT_BUMP);
   SetSensorTouch(SENS_PORT_FRONT_BUMP);
+
+  SetSensorType(PORT_TMUX, IN_TYPE_LIGHT_INACTIVE);
 }
 
 bool Update () {
@@ -14,9 +16,11 @@ bool Update () {
   sens[RIGHT] = ReadSens(SENS_RIGHT);
   sensOuter[RIGHT] = ReadSens(SENS_OUTER_RIGHT);
 
-  sensBumper[LEFT] = Sensor(SENS_PORT_LEFT_BUMP);
+  ReadSensorHTTouchMultiplexer(PORT_TMUX, sensBumper[LEFT], sensBumper[CENTER], sensBumber[RIGHT], ballContact);
+
+  /*sensBumper[LEFT] = Sensor(SENS_PORT_LEFT_BUMP);
   sensBumper[RIGHT] = false;
-  sensBumper[CENTER] = Sensor(SENS_PORT_FRONT_BUMP);
+  sensBumper[CENTER] = Sensor(SENS_PORT_FRONT_BUMP);*/
 
   return true;
 }
