@@ -7,7 +7,7 @@ void Move (char left, char right) {
   }
 }
 
-void MoveDir(bool dir, char inner, char outer) {
+void MoveDir (bool dir, char inner, char outer) {
   if (dir == LEFT) {
     Move(inner, outer);
   } else {
@@ -21,4 +21,12 @@ void MoveRot (int rotationCount, char left, char right) {
   // false is LEFT, and true is RIGHT. (duh ;])
   MoveDir(rotationCount < 0, left, right);
   until(abs(MotorRotationCount(MOTOR_LEFT)) > abs(rotationCount));
+}
+
+void MoveDirRot (bool dir, int rotationCount, char inner, char outer) {
+  if (dir == LEFT) {
+    MoveRot(rotationCount, inner, outer);
+  } else {
+    MoveRot(rotationCount, outer, inner);
+  }
 }

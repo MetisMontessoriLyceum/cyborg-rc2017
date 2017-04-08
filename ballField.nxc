@@ -1,0 +1,42 @@
+#include "_defines.nxc"
+#include "_move.nxc"
+#include "_sensor.nxc"
+#include "_debug.nxc"
+#include "_generic.nxc"
+
+void FollowWall (byte dir) {
+  float increaseSpeed = 0.5;
+  while (true) {
+    unsigned long startTick = CurrentTick();
+    unsigned long startCenterBumpTick = 0;
+    while (Update()) {
+      byte extraSpeed = Min((CurrentTick() - startTick) * 0.02, 100);
+      MoveDir(dir, Max(0, (extraSpeed - 50)*2), 50 + Min(extraSpeed, 50));
+
+      if (sensBumper[CENTER]) {
+        if (startCenterBumpTick == 0) {
+          startCenterBumpTick = CurrentTick();
+        } else if (CurrentTick() - startCenterBumpTick > 7000) {
+          Move(0,0);
+          return;
+        }
+      } else {
+        startCenterBumpTick = 0;
+      }
+
+      if (sensBumper[CENTER] && sensBumper[LEFT]) {
+        MoveRot(80, -50, -50);
+        MoveDirRot(!dir, 400, MOVE_INNER);
+        break;
+      } else if (sensBumper[LEFT]) {
+        MoveDirRot(!dir, 230, MOVE_INNER);
+        break;
+      }
+    }
+  }
+}
+
+task main () {
+  Setup();
+  FollowWall(LEFT);
+}
