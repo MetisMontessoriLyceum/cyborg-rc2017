@@ -60,11 +60,6 @@ byte SensorHTSmartColor (byte sensPort) {
   } else {
     return COLOR_WHITE;
   }
-
-  /*ClearScreen();
-  NumOut(0,LCD_LINE1,red);
-  NumOut(0,LCD_LINE2,green);
-  NumOut(0,LCD_LINE3,blue);*/
 }
 
 byte ReadSens (byte sensorID) {
