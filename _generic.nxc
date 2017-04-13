@@ -4,9 +4,6 @@ void Setup () {
   SetMode(MODE_GRAYSCALE);
   SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
 
-  /*SetSensorTouch(SENS_PORT_LEFT_BUMP);
-  SetSensorTouch(SENS_PORT_FRONT_BUMP);*/
-
   SetSensorTouch(TOUCH_MULTI_PORT);
 }
 
@@ -22,9 +19,6 @@ bool Update () {
   sensBumper[LEFT] = temp1;
   sensBumper[RIGHT] = temp3;
   sensBumper[CENTER] = temp2;
-  /*sensBumper[LEFT] = Sensor(SENS_PORT_LEFT_BUMP);
-  sensBumper[RIGHT] = false;
-  sensBumper[CENTER] = Sensor(SENS_PORT_FRONT_BUMP);*/
 
   return true;
 }
