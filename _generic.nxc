@@ -7,7 +7,7 @@ void Setup () {
   /*SetSensorTouch(SENS_PORT_LEFT_BUMP);
   SetSensorTouch(SENS_PORT_FRONT_BUMP);*/
 
-  SetSensorType(TOUCH_MULTI_PORT, IN_TYPE_LIGHT_INACTIVE);
+  SetSensorTouch(TOUCH_MULTI_PORT);
 }
 
 bool Update () {

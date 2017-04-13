@@ -50,7 +50,7 @@ void AvoidObstacle () {
 }
 
 void FollowLine () {
-  if (Sensor(SENS_PORT_FRONT_BUMP) == 1) {
+  if (sensBumper[CENTER]) {
     AvoidObstacle();
   }
 
