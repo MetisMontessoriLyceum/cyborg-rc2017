@@ -36,8 +36,25 @@ void FollowWall (byte dir) {
   }
 }
 
+void FindBall () {
+  Move(MOVE_FORWARD);
+  int lastDist;
+  int diff;
+  do {
+    lastDist = DISTNxDistance(SENS_PORT_DIST, 0x02);
+    Wait(200);
+
+    diff = DISTNxDistance(SENS_PORT_DIST, 0x02) - lastDist;
+    ClearLine(LCD_LINE1);
+    NumOut(0, LCD_LINE1, diff);
+  } while (diff < 100);
+
+  Move(0,0);
+}
+
 task main () {
   Setup();
-  FollowWall(LEFT); // TODO: change this to detect a wall and follow related to 
+
+  FollowWall(LEFT); // TODO: change this to detect a wall and follow related to
                     // that...
 }
