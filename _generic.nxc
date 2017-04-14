@@ -25,6 +25,17 @@ bool Update () {
   return true;
 }
 
+void WaitForColor (byte dir, byte color) {
+  while (Update()) {
+    if (sens[dir] != color) {
+      ResetRotationCount(MOTOR_LEFT);
+      Wait(1);
+    } else if (abs(MotorRotationCount(MOTOR_LEFT)) > 20) {
+      break;
+    }
+  }
+}
+
 int Max (int a, int b) {
   if (a < b) return b;
   else return a;

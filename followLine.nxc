@@ -4,6 +4,8 @@
 #include "_debug.nxc"
 #include "_generic.nxc"
 
+long greenMrc = 0;
+
 void GreenMove (bool dir) {
   RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 250);
   Move(0,0);
@@ -23,9 +25,11 @@ void GreenMove (bool dir) {
   Move(0,0);
 
   MoveDir(!dir, MOVE_INNER);
-  until(Update() && Debug() && sens[dir] == COLOR_BLACK);
+  WaitForColor(dir, COLOR_BLACK);
+
   MoveDir(dir, MOVE_INNER);
   until(Update() && Debug() && sens[dir] != COLOR_BLACK);
+  Move(0,0);
 }
 
 void OuterMove (bool dir) {
@@ -54,10 +58,19 @@ void FollowLine () {
     AvoidObstacle();
   }
 
-  if (sens[LEFT] == COLOR_GREEN) {
+  long mrc = abs(MotorRotationCount(MOTOR_LEFT));
+  if (sens[LEFT] == COLOR_GREEN || sens[RIGHT] == COLOR_GREEN) {
+    if (greenMrc == 0) greenMrc = mrc;
+  } else {
+    greenMrc = 0;
+  }
+  bool shouldTrustGreen = greenMrc != 0
+      && (mrc - greenMrc < 20 || mrc - greenMrc > 20);
+
+  if (shouldTrustGreen && sens[LEFT] == COLOR_GREEN) {
     VisualDebug(VDEBUG_GREEN_LEFT);
     GreenMove(LEFT);
-  } else if (sens[RIGHT] == COLOR_GREEN) {
+  } else if (shouldTrustGreen && sens[RIGHT] == COLOR_GREEN) {
     VisualDebug(VDEBUG_GREEN_RIGHT);
     GreenMove(RIGHT);
   }
