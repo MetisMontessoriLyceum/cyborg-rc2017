@@ -13,6 +13,7 @@
 #define MOTOR_LEFT OUT_B
 #define MOTOR_RIGHT OUT_C
 #define MOTOR_BOTH OUT_BC
+#define MOTOR_GRABBER OUT_A
 
 #define C1 0xA0
 #define C2 0xA2
