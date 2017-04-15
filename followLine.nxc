@@ -7,21 +7,13 @@
 long greenMrc = 0;
 
 void GreenMove (bool dir) {
-  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 250);
+  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 300);
   Move(0,0);
 
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
   MoveDir(dir, MOVE_INNER);
-  until (abs(MotorRotationCount(MOTOR_LEFT)) > 500);
-  Move(0,0);
-
-  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 100);
-
-  ResetRotationCount(MOTOR_LEFT);
-  Wait(1);
-  MoveDir(dir, MOVE_INNER);
-  until (abs(MotorRotationCount(MOTOR_LEFT)) > 200);
+  until (abs(MotorRotationCount(MOTOR_LEFT)) > 700);
   Move(0,0);
 
   MoveDir(!dir, MOVE_INNER);
