@@ -30,8 +30,19 @@ void FollowWall (byte dir, byte whenStop) {
         MoveDirRot(!dir, 400, MOVE_INNER);
         break;
       } else if (sensBumper[dir]) {
-        MoveDirRot(!dir, 230, MOVE_INNER);
-        break;
+        ResetRotationCount(MOTOR_LEFT);
+        Wait(1);
+
+        MoveDir(!dir, MOVE_INNER);
+        until(abs(MotorRotationCount(MOTOR_LEFT)) > abs(230)
+            || (Update() && sensOuter[dir] == COLOR_BLACK
+                         && whenStop == STOP_ON_LINE));
+
+        if (sensOuter[dir] == COLOR_BLACK && whenStop == STOP_ON_LINE) {
+          return;
+        } else {
+          break;
+        }
       }
     }
   }
