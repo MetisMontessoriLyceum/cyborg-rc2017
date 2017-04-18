@@ -37,13 +37,20 @@ void OuterMove (bool dir) {
 }
 
 void AvoidObstacle () {
+  byte dir;
+  if (SensorUS(SENS_PORT_DIST_US) < 60) {
+    dir = RIGHT;
+  } else {
+    dir = LEFT;
+  }
+
   MoveRot(100, MOVE_BACKWARD);
-  MoveRot(450, MOVE_LEFT);
-  FollowWall(RIGHT, STOP_ON_LINE);
+  MoveDirRot(dir, 450, MOVE_INNER);
+  FollowWall(!dir, STOP_ON_LINE);
   Move(0,0);
   MoveRot(200, MOVE_FORWARD);
-  Move(MOVE_LEFT);
-  until(Update() && sens[RIGHT] == COLOR_BLACK);
+  MoveDir(dir, MOVE_INNER);
+  until(Update() && sens[dir] == COLOR_BLACK);
   Move(0,0);
 }
 
