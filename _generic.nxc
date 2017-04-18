@@ -4,7 +4,8 @@ void Setup () {
   SetMode(MODE_GRAYSCALE);
   SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
 
-  SetSensorLowspeed(SENS_PORT_DIST);
+  SetSensorLowspeed(SENS_PORT_DIST_IR);
+  SetSensorUltrasonic(SENS_PORT_DIST_US);
 
   SetSensorTouch(TOUCH_MULTI_PORT);
 }
