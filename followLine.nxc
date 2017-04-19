@@ -31,9 +31,11 @@ void OuterMove (bool dir) {
   Move(0,0);
 
   MoveDir(dir, MOVE_INNER);
-  until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
+  until(Update() && Debug() && (sens[!dir] == COLOR_BLACK || sensOuter[!dir] == COLOR_BLACK));
   MoveDir(!dir, MOVE_INNER);
-  until(Update() && Debug() && sens[!dir] != COLOR_BLACK);
+  if (sens[!dir] == COLOR_BLACK) {
+    until(Update() && Debug() && sens[!dir] != COLOR_BLACK);
+  }
 }
 
 void AvoidObstacle () {
