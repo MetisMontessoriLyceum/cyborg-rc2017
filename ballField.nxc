@@ -5,73 +5,9 @@
 #include "_generic.nxc"
 
 #include "_obstacle.nxc"
-
-void FindBall () {
-  Move(40, 40);
-  int lastDist;
-  int diff;
-  do {
-    lastDist = DISTNxDistance(SENS_PORT_DIST_IR, 0x02);
-    Wait(200);
-
-    diff = DISTNxDistance(SENS_PORT_DIST_IR, 0x02) - lastDist;
-    ClearLine(LCD_LINE1);
-    NumOut(0, LCD_LINE1, diff);
-  } while (diff > -100); // we are only intrested when something comes closer
-
-  Move(0,0);
-}
-
-void GrabBall () {
-  ResetRotationCount(OUT_C);
-  Wait(1);
-  Move(MOVE_BACKWARD);
-
-  long lastMrc;
-  long mrc;
-  bool wasFast = false;
-  do {
-    lastMrc = abs(MotorRotationCount(OUT_C));
-    Wait(400);
-    mrc = abs(MotorRotationCount(OUT_C));
-    ClearLine(LCD_LINE1);
-    NumOut(0,LCD_LINE1,mrc - lastMrc);
-    if (mrc - lastMrc > 190) wasFast = true;
-  } while (!wasFast || mrc - lastMrc > 170)
-  Move(0,0);
-  MoveRot(50, MOVE_FORWARD);
-  Move(0,0);
-
-  OnFwd(MOTOR_GRABBER, 40);
-  Wait(200);
-  MoveRot(200,MOVE_FORWARD);
-  Float(MOTOR_GRABBER);
-  Move(0,0);
-}
+#include "_ballField.nxc"
 
 task main () {
   Setup();
-
-  FindBall();
-
-  MoveRot(50, MOVE_FORWARD);
-  Move(0,0);
-  MoveRot(600, MOVE_LEFT);
-  Move(0,0);
-  Move(100,100);
-  until(Update() && sensBumper[CENTER]);
-  Wait(500);
-  Move(0,0);
-
-  GrabBall();
-
-  FollowWall(RIGHT, STOP_ON_BALLDUMP);
-
-  MoveRot(800, NORMAL_SPEED*0.7, -NORMAL_SPEED);
-  MoveRot(200, MOVE_BACKWARD);
-  Move(0,0);
-
-  OnFwd(MOTOR_GRABBER, -40);
-  Wait(200);
-  Float(MOTOR_GRABBER);
+  BallRoutine();
 }

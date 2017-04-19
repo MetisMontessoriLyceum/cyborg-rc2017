@@ -49,3 +49,4 @@
 #define COLOR_RED 5
 #define COLOR_WHITE 6
 #define COLOR_BROWN 7
+#define COLOR_REFLECTIVE 8

@@ -5,6 +5,7 @@
 #include "_generic.nxc"
 
 #include "_obstacle.nxc"
+#include "_ballField.nxc"
 
 long greenMrc = 0;
 
@@ -110,7 +111,11 @@ task main () {
   Setup();
   while (Update()) {
     Debug();
+    if (sensOuter[LEFT] == COLOR_REFLECTIVE) break;
     FollowLine();
     ToggleMode();
   }
+  Move(0,0);
+
+  BallRoutine();
 }

@@ -55,7 +55,9 @@ byte SensorHTSmartColor (byte sensPort) {
   byte blue;
   ReadSensorHTColor(sensPort, colorNum, red, green, blue);
 
-  if (red < 50 && green < 50 && blue < 50) {
+  if (red == 255 && green == 255 && red == 255) {
+    return COLOR_REFLECTIVE;
+  } if (red < 50 && green < 50 && blue < 50) {
     return COLOR_BLACK;
   } else {
     return COLOR_WHITE;
