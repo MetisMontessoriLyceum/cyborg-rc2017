@@ -4,28 +4,26 @@
 #include "_debug.nxc"
 #include "_generic.nxc"
 
+#include "_obstacle.nxc"
+
+long greenMrc = 0;
+
 void GreenMove (bool dir) {
-  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 250);
+  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 300);
   Move(0,0);
 
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
   MoveDir(dir, MOVE_INNER);
-  until (abs(MotorRotationCount(MOTOR_LEFT)) > 500);
-  Move(0,0);
-
-  RotateMotor(MOTOR_BOTH, -NORMAL_SPEED, 100);
-
-  ResetRotationCount(MOTOR_LEFT);
-  Wait(1);
-  MoveDir(dir, MOVE_INNER);
-  until (abs(MotorRotationCount(MOTOR_LEFT)) > 200);
+  until (abs(MotorRotationCount(MOTOR_LEFT)) > 700);
   Move(0,0);
 
   MoveDir(!dir, MOVE_INNER);
-  until(Update() && Debug() && sens[dir] == COLOR_BLACK);
+  WaitForColor(dir, COLOR_BLACK);
+
   MoveDir(dir, MOVE_INNER);
   until(Update() && Debug() && sens[dir] != COLOR_BLACK);
+  Move(0,0);
 }
 
 void OuterMove (bool dir) {
@@ -33,20 +31,29 @@ void OuterMove (bool dir) {
   Move(0,0);
 
   MoveDir(dir, MOVE_INNER);
-  until(Update() && Debug() && sens[!dir] == COLOR_BLACK);
+  until(Update() && Debug() && (sens[!dir] == COLOR_BLACK || sensOuter[!dir] == COLOR_BLACK));
   MoveDir(!dir, MOVE_INNER);
-  until(Update() && Debug() && sens[!dir] != COLOR_BLACK);
+  if (sens[!dir] == COLOR_BLACK) {
+    until(Update() && Debug() && sens[!dir] != COLOR_BLACK);
+  }
 }
 
 void AvoidObstacle () {
-  MoveRot(260, MOVE_BACKWARD);
-  MoveRot(450, MOVE_LEFT);
-  Move(1.5*NORMAL_SPEED, 0.5*NORMAL_SPEED);
-  until(Update() && sens[RIGHT] == COLOR_BLACK);
+  byte dir;
+  if (SensorUS(SENS_PORT_DIST_US) < 60) {
+    dir = RIGHT;
+  } else {
+    dir = LEFT;
+  }
+
+  MoveRot(100, MOVE_BACKWARD);
+  MoveDirRot(dir, 450, MOVE_INNER);
+  FollowWall(!dir, STOP_ON_LINE);
+  Move(0,0);
   MoveRot(200, MOVE_FORWARD);
-  Move(MOVE_LEFT);
-  until(Update() && sens[RIGHT] == COLOR_BLACK);
-  MoveRot(260, MOVE_BACKWARD);
+  MoveDir(dir, MOVE_INNER);
+  until(Update() && sens[dir] == COLOR_BLACK);
+  Move(0,0);
 }
 
 void FollowLine () {
@@ -54,10 +61,22 @@ void FollowLine () {
     AvoidObstacle();
   }
 
-  if (sens[LEFT] == COLOR_GREEN) {
+  bool shouldTrustGreen = false;
+  if (mode == MODE_COLOR) {
+    long mrc = abs(MotorRotationCount(MOTOR_LEFT));
+    if (sens[LEFT] == COLOR_GREEN || sens[RIGHT] == COLOR_GREEN) {
+      if (greenMrc == 0) greenMrc = mrc;
+      } else {
+        greenMrc = 0;
+      }
+      shouldTrustGreen = greenMrc != 0
+          && (mrc - greenMrc < -10 || mrc - greenMrc > 10);
+  }
+
+  if (shouldTrustGreen && sens[LEFT] == COLOR_GREEN) {
     VisualDebug(VDEBUG_GREEN_LEFT);
     GreenMove(LEFT);
-  } else if (sens[RIGHT] == COLOR_GREEN) {
+  } else if (shouldTrustGreen && sens[RIGHT] == COLOR_GREEN) {
     VisualDebug(VDEBUG_GREEN_RIGHT);
     GreenMove(RIGHT);
   }

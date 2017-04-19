@@ -10,10 +10,14 @@ task main() {
     if (ButtonPressed(BTNRIGHT)) SetMode(MODE_COLOR);
     else if (ButtonPressed(BTNLEFT)) SetMode(MODE_GRAYSCALE);
     Debug();
+
+    ClearLine(LCD_LINE3);
+    NumOut(0,LCD_LINE3,SensorUS(SENS_PORT_DIST_US));
+
     if (mode == MODE_COLOR) {
-      TextOut(0,LCD_LINE3,"MODE_COLOR    ");
+      TextOut(0,LCD_LINE4,"MODE_COLOR    ");
     } else {
-      TextOut(0,LCD_LINE3,"MODE_GRAYSCALE");
+      TextOut(0,LCD_LINE4,"MODE_GRAYSCALE");
     }
     Wait(200);
   }

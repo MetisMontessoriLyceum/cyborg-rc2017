@@ -1,0 +1,49 @@
+#define STOP_ON_BALLDUMP 0
+#define STOP_ON_LINE 1
+
+void FollowWall (byte dir, byte whenStop) {
+  float increaseSpeed = 0.5;
+  while (true) {
+    unsigned long startTick = CurrentTick();
+    unsigned long startCenterBumpTick = 0;
+    while (Update()) {
+      byte extraSpeed = Min((CurrentTick() - startTick) * 0.02, 100);
+      MoveDir(dir, Max(0, (extraSpeed - 50)*2), 50 + Min(extraSpeed, 50));
+
+      if (whenStop == STOP_ON_BALLDUMP) {
+        if (sensBumper[CENTER]) {
+          if (startCenterBumpTick == 0) {
+            startCenterBumpTick = CurrentTick();
+          } else if (CurrentTick() - startCenterBumpTick > 7000) {
+            Move(0,0);
+            return;
+          }
+        } else {
+          startCenterBumpTick = 0;
+        }
+      } else if (whenStop == STOP_ON_LINE) {
+        if (sensOuter[dir] == COLOR_BLACK) return;
+      }
+
+      if (sensBumper[CENTER] && ( sensBumper[LEFT] || sensBumper[RIGHT] ) ) {
+        MoveRot(80, -50, -50);
+        MoveDirRot(!dir, 400, MOVE_INNER);
+        break;
+      } else if (sensBumper[dir]) {
+        ResetRotationCount(MOTOR_LEFT);
+        Wait(1);
+
+        MoveDir(!dir, MOVE_INNER);
+        until(abs(MotorRotationCount(MOTOR_LEFT)) > abs(230)
+            || (Update() && sensOuter[dir] == COLOR_BLACK
+                         && whenStop == STOP_ON_LINE));
+
+        if (sensOuter[dir] == COLOR_BLACK && whenStop == STOP_ON_LINE) {
+          return;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+}

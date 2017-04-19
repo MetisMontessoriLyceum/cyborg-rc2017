@@ -4,47 +4,17 @@
 #include "_debug.nxc"
 #include "_generic.nxc"
 
-void FollowWall (byte dir) {
-  float increaseSpeed = 0.5;
-  while (true) {
-    unsigned long startTick = CurrentTick();
-    unsigned long startCenterBumpTick = 0;
-    while (Update()) {
-      byte extraSpeed = Min((CurrentTick() - startTick) * 0.02, 100);
-      MoveDir(dir, Max(0, (extraSpeed - 50)*2), 50 + Min(extraSpeed, 50));
-
-      if (sensBumper[CENTER]) {
-        if (startCenterBumpTick == 0) {
-          startCenterBumpTick = CurrentTick();
-        } else if (CurrentTick() - startCenterBumpTick > 7000) {
-          Move(0,0);
-          return;
-        }
-      } else {
-        startCenterBumpTick = 0;
-      }
-
-      if (sensBumper[CENTER] && ( sensBumper[LEFT] || sensBumper[RIGHT] ) ) {
-        MoveRot(80, -50, -50);
-        MoveDirRot(!dir, 400, MOVE_INNER);
-        break;
-      } else if (sensBumper[dir]) {
-        MoveDirRot(!dir, 230, MOVE_INNER);
-        break;
-      }
-    }
-  }
-}
+#include "_obstacle.nxc"
 
 void FindBall () {
   Move(MOVE_FORWARD);
   int lastDist;
   int diff;
   do {
-    lastDist = DISTNxDistance(SENS_PORT_DIST, 0x02);
+    lastDist = DISTNxDistance(SENS_PORT_DIST_IR, 0x02);
     Wait(200);
 
-    diff = DISTNxDistance(SENS_PORT_DIST, 0x02) - lastDist;
+    diff = DISTNxDistance(SENS_PORT_DIST_IR, 0x02) - lastDist;
     ClearLine(LCD_LINE1);
     NumOut(0, LCD_LINE1, diff);
   } while (diff < 100);
@@ -55,6 +25,6 @@ void FindBall () {
 task main () {
   Setup();
 
-  FollowWall(LEFT); // TODO: change this to detect a wall and follow related to
-                    // that...
+  // TODO: change this to detect a wall and follow related to that...
+  FollowWall(LEFT, STOP_ON_BALLDUMP);
 }

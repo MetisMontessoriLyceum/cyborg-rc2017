@@ -4,7 +4,8 @@ void Setup () {
   SetMode(MODE_GRAYSCALE);
   SensorSplitterSetMode(SENS_PORT_OUTER_RIGHT, MODE_COLOR);
 
-  SetSensorLowspeed(SENS_PORT_DIST);
+  SetSensorLowspeed(SENS_PORT_DIST_IR);
+  SetSensorUltrasonic(SENS_PORT_DIST_US);
 
   SetSensorTouch(TOUCH_MULTI_PORT);
 }
@@ -23,6 +24,17 @@ bool Update () {
   sensBumper[CENTER] = temp2;
 
   return true;
+}
+
+void WaitForColor (byte dir, byte color) {
+  while (Update()) {
+    if (sens[dir] != color) {
+      ResetRotationCount(MOTOR_LEFT);
+      Wait(1);
+    } else if (abs(MotorRotationCount(MOTOR_LEFT)) > 20) {
+      break;
+    }
+  }
 }
 
 int Max (int a, int b) {
