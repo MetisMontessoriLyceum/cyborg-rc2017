@@ -8,6 +8,8 @@ void Setup () {
   SetSensorUltrasonic(SENS_PORT_DIST_US);
 
   SetSensorTouch(TOUCH_MULTI_PORT);
+
+  DISTNxGP2YA02(SENS_PORT_DIST_IR, 0x02);
 }
 
 bool Update () {

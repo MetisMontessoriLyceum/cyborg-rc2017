@@ -1,15 +1,28 @@
 void FindBall () {
+  ResetRotationCount(MOTOR_LEFT);
+  Wait(1);
+
   Move(40, 40);
   int lastDist;
   int diff;
   do {
+    if (sensBumper[CENTER]) {
+      MoveRot(200, MOVE_BACKWARD);
+      MoveRot(500, MOVE_RIGHT);
+      Move(0,0);
+      ResetRotationCount(MOTOR_LEFT);
+      Wait(1);
+      Move(40, 40);
+    }
+
     lastDist = DISTNxDistance(SENS_PORT_DIST_IR, 0x02);
     Wait(200);
 
     diff = DISTNxDistance(SENS_PORT_DIST_IR, 0x02) - lastDist;
     ClearLine(LCD_LINE1);
     NumOut(0, LCD_LINE1, diff);
-  } while (diff > -100); // we are only intrested when something comes closer
+    NumOut(50, LCD_LINE1, MotorRotationCount(MOTOR_LEFT));
+  } while (Update() && (diff > -100 || abs(MotorRotationCount(MOTOR_LEFT)) < 200)); // we are only intrested when something comes closer
 
   Move(0,0);
 }
@@ -28,8 +41,8 @@ void GrabBall () {
     mrc = abs(MotorRotationCount(OUT_C));
     ClearLine(LCD_LINE1);
     NumOut(0,LCD_LINE1,mrc - lastMrc);
-    if (mrc - lastMrc > 190) wasFast = true;
-  } while (!wasFast || mrc - lastMrc > 170)
+    if (mrc - lastMrc > 150) wasFast = true;
+  } while (!wasFast || mrc - lastMrc > 100)
   Move(0,0);
   MoveRot(50, MOVE_FORWARD);
   Move(0,0);
@@ -42,10 +55,27 @@ void GrabBall () {
 }
 
 void BallRoutine () {
+  Move(0,0);
+  OnFwd(MOTOR_GRABBER, -40);
+  Wait(150);
+  Float(MOTOR_GRABBER);
+
   MoveRot(700, MOVE_FORWARD);
   Move(0,0);
-  if (SensorUS(SENS_PORT_DIST_US) > 60) {
+  if (SensorUS(SENS_PORT_DIST_US) > 30) {
     MoveRot(500, MOVE_LEFT);
+    Move(MOVE_BACKWARD);
+    unsigned long lastMrc;
+    unsigned long mrc;
+    bool wasFast = false;
+    do {
+      lastMrc = abs(MotorRotationCount(OUT_C));
+      Wait(400);
+      mrc = abs(MotorRotationCount(OUT_C));
+      ClearLine(LCD_LINE1);
+      NumOut(0,LCD_LINE1,mrc - lastMrc);
+      if (mrc - lastMrc > 30) wasFast = true;
+    } while (!wasFast || mrc - lastMrc > 20)
   }
   Move(0,0);
 

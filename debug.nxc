@@ -13,6 +13,7 @@ task main() {
 
     ClearLine(LCD_LINE3);
     NumOut(0,LCD_LINE3,SensorUS(SENS_PORT_DIST_US));
+    NumOut(50,LCD_LINE3,DISTNxDistance(SENS_PORT_DIST_IR, 0x02));
 
     if (mode == MODE_COLOR) {
       TextOut(0,LCD_LINE4,"MODE_COLOR    ");
