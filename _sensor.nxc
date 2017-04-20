@@ -1,7 +1,6 @@
 byte sens[2];
 byte sensOuter[2];
 byte sensBumper[3];
-byte ballContact;
 byte mode;
 
 void SensorSplitterSetMode (byte port, byte subport, byte mode) {

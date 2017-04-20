@@ -18,12 +18,13 @@ bool Update () {
   sens[RIGHT] = ReadSens(SENS_RIGHT);
   sensOuter[RIGHT] = ReadSens(SENS_OUTER_RIGHT);
 
-  byte temp1,temp2,temp3;
-  ReadSensorHTTouchMultiplexer(TOUCH_MULTI_PORT, temp1, temp2, temp3, ballContact);
+  byte temp1,temp2,temp3,temp4;
+  ReadSensorHTTouchMultiplexer(TOUCH_MULTI_PORT, temp1, temp2, temp3, temp4);
 
-  sensBumper[LEFT] = temp1;
+  sensBumper[LEFT] = temp4;
   sensBumper[RIGHT] = temp3;
   sensBumper[CENTER] = temp2;
+  sensBumper[BALL] = temp1;
 
   return true;
 }

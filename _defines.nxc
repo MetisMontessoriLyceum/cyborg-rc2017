@@ -1,6 +1,7 @@
 #define LEFT 0
 #define RIGHT 1
 #define CENTER 2
+#define BALL 3
 
 #define NORMAL_SPEED 60
 #define MOVE_FORWARD NORMAL_SPEED, NORMAL_SPEED
