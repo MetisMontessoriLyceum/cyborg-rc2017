@@ -77,8 +77,9 @@ void GrabBall () {
 
   OnFwd(MOTOR_GRABBER, 40);
   Wait(200);
-  MoveRot(200,MOVE_FORWARD);
-  Float(MOTOR_GRABBER);
+  Move(MOVE_FORWARD);
+  until(Update() && sensBumper[BALL]);
+  Off(MOTOR_GRABBER);
   Move(0,0);
 }
 
