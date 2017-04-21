@@ -20,6 +20,25 @@ void BallGrabberDown() {
 // the BallGrabberUp is highly dependend on the situation and is therefor not a
 // function.
 
+void MoveBackwardUntilWall () {
+  ResetRotationCount(MOTOR_LEFT);
+  Wait(1);
+  Move(MOVE_BACKWARD);
+  long lastMrc = 0;
+  long mrc = 0;
+  long lastDiff = 0;
+  long diff = 0;
+  do {
+    lastDiff = diff;
+    lastMrc = mrc;
+    Wait(200);
+    mrc = abs(MotorRotationCount(MOTOR_LEFT));
+    diff = mrc - lastMrc;
+    ClearLine(LCD_LINE1);
+    NumOut(0,LCD_LINE1, diff - lastDiff);
+  } while (diff - lastDiff > -20)
+}
+
 void FindBall () {
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
@@ -50,21 +69,8 @@ void FindBall () {
 }
 
 void GrabBall () {
-  ResetRotationCount(OUT_C);
-  Wait(1);
-  Move(MOVE_BACKWARD);
+  MoveBackwardUntilWall();
 
-  long lastMrc;
-  long mrc;
-  bool wasFast = false;
-  do {
-    lastMrc = abs(MotorRotationCount(OUT_C));
-    Wait(400);
-    mrc = abs(MotorRotationCount(OUT_C));
-    ClearLine(LCD_LINE1);
-    NumOut(0,LCD_LINE1,mrc - lastMrc);
-    if (mrc - lastMrc > 150) wasFast = true;
-  } while (!wasFast || mrc - lastMrc > 100)
   Move(0,0);
   MoveRot(50, MOVE_FORWARD);
   Move(0,0);
@@ -84,18 +90,8 @@ void BallRoutine () {
   Move(0,0);
   if (SensorUS(SENS_PORT_DIST_US) > 30) {
     MoveRot(550, MOVE_LEFT);
-    Move(MOVE_BACKWARD);
-    unsigned long lastMrc;
-    unsigned long mrc;
-    bool wasFast = false;
-    do {
-      lastMrc = abs(MotorRotationCount(OUT_C));
-      Wait(400);
-      mrc = abs(MotorRotationCount(OUT_C));
-      ClearLine(LCD_LINE1);
-      NumOut(0,LCD_LINE1,mrc - lastMrc);
-      if (mrc - lastMrc > 30) wasFast = true;
-    } while (!wasFast || mrc - lastMrc > 20)
+    Move(0,0);
+    MoveBackwardUntilWall();
   }
   Move(0,0);
 
