@@ -1,3 +1,24 @@
+// WARNING: Always move/turn off the grabber after calling this function!!
+void BallGrabberReset () {
+  OnFwd(MOTOR_GRABBER, -40);
+  Wait(500);
+  OnFwd(MOTOR_GRABBER, 40);
+  until(Update() && sensBumper[BALL]);
+  Wait(200);
+  Off(MOTOR_GRABBER);
+  ResetRotationCount(MOTOR_GRABBER); // 0 should aways equal top.
+  Wait(1);
+}
+
+void BallGrabberDown() {
+  OnFwd(MOTOR_GRABBER, -40);
+  until(abs(MotorRotationCount(MOTOR_GRABBER)) > 170);
+  Float(MOTOR_GRABBER);
+}
+
+// the BallGrabberUp is highly dependend on the situation and is therefor not a
+// function.
+
 void FindBall () {
   ResetRotationCount(MOTOR_LEFT);
   Wait(1);
@@ -55,10 +76,8 @@ void GrabBall () {
 }
 
 void BallRoutine () {
-  Move(0,0);
-  OnFwd(MOTOR_GRABBER, -40);
-  Wait(150);
-  Float(MOTOR_GRABBER);
+  BallGrabberReset();
+  BallGrabberDown();
 
   MoveRot(700, MOVE_FORWARD);
   Move(0,0);
