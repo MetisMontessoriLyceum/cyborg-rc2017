@@ -12,7 +12,8 @@ void BallGrabberReset () {
 
 void BallGrabberDown() {
   OnFwd(MOTOR_GRABBER, -40);
-  until(abs(MotorRotationCount(MOTOR_GRABBER)) > 170);
+  // NOTE: The grabbers should block the wheels of the robot.
+  until(abs(MotorRotationCount(MOTOR_GRABBER)) > 160);
   Float(MOTOR_GRABBER);
 }
 
@@ -82,7 +83,7 @@ void BallRoutine () {
   MoveRot(700, MOVE_FORWARD);
   Move(0,0);
   if (SensorUS(SENS_PORT_DIST_US) > 30) {
-    MoveRot(500, MOVE_LEFT);
+    MoveRot(550, MOVE_LEFT);
     Move(MOVE_BACKWARD);
     unsigned long lastMrc;
     unsigned long mrc;
