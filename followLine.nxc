@@ -41,7 +41,7 @@ void OuterMove (bool dir) {
 
 void AvoidObstacle () {
   byte dir;
-  if (SensorUS(SENS_PORT_DIST_US) < 60) {
+  if (SensorUS(SENS_PORT_DIST_US) < 25) {
     dir = RIGHT;
   } else {
     dir = LEFT;
@@ -111,7 +111,7 @@ task main () {
   Setup();
   while (Update()) {
     Debug();
-    if (sensOuter[LEFT] == COLOR_REFLECTIVE) break;
+    if (sensOuter[LEFT] == COLOR_REFLECTIVE && (sens[LEFT] == COLOR_REFLECTIVE || sens[RIGHT] == COLOR_REFLECTIVE)) break;
     FollowLine();
     ToggleMode();
   }

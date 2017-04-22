@@ -90,6 +90,8 @@ byte ReadSens (byte sensorID) {
       if (mode == MODE_GRAYSCALE) {
         if (rawValue < 15) {
           return COLOR_BLACK;
+        } else if (rawValue > 90) {
+          return COLOR_REFLECTIVE;
         } else {
           return COLOR_WHITE;
         }
