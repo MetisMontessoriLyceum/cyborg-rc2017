@@ -71,7 +71,7 @@ void FollowLine () {
         greenMrc = 0;
       }
       shouldTrustGreen = greenMrc != 0
-          && (mrc - greenMrc < -10 || mrc - greenMrc > 10);
+          && (mrc - greenMrc < -20 || mrc - greenMrc > 20);
   }
 
   if (shouldTrustGreen && sens[LEFT] == COLOR_GREEN) {

@@ -95,8 +95,11 @@ byte ReadSens (byte sensorID) {
         } else {
           return COLOR_WHITE;
         }
-      } // if this is not true, it executes the code below in the outer right
-        // case.
+      } else {
+        if (rawValue == COLOR_BLUE) {
+          rawValue = COLOR_WHITE;
+        }
+      }
     case SENS_OUTER_RIGHT:
       return rawValue;
   }

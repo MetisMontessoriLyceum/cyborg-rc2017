@@ -20,6 +20,7 @@ task main() {
     } else {
       TextOut(0,LCD_LINE4,"MODE_GRAYSCALE");
     }
+    ClearLine(LCD_LINE8);
     NumOut(0,LCD_LINE8, SensorSplitter(SENS_PORT_LEFT));
     Wait(200);
   }

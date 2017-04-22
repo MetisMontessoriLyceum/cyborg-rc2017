@@ -79,6 +79,7 @@ void GrabBall () {
   Wait(200);
   Move(MOVE_FORWARD);
   until(Update() && sensBumper[BALL]);
+  Wait(200);
   Off(MOTOR_GRABBER);
   Move(0,0);
 }
